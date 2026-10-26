@@ -26,10 +26,17 @@ if uploaded_file is not None:
         projectSchedule = getSOactivities(sheet, selectedSo)
 
     if selectedSo is not None:
-        fig = createGanttChart(projectSchedule)
-        st.pyplot(fig)
 
-    grouped = groupSchedule(projectSchedule)
+        grouped = groupSchedule(projectSchedule)
+        selectedSections = []
+        selectedTasks = []
 
-    for section, tasks in grouped.items():
-        st.text(f"{section}: {len(tasks)} activities")
+        for section in grouped:
+            if st.checkbox(section, value=True):
+                selectedSections.append(section)
+                selectedTasks.extend(grouped[section])
+        if selectedTasks:
+            fig = createGanttChart(selectedTasks)
+            st.pyplot(fig)
+        else:
+            st.info("Select at least one section to display the Gantt chart.")
