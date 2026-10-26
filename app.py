@@ -19,4 +19,4 @@ if uploaded_file is not None:
     sheet = workbook["Tasks"]
 
     so_nums = listAllSO(sheet)
-    st.text(so_nums)
+    selectedSo = st.selectbox( "Select Service Order Number", sorted(so_nums), index=None, placeholder="Search for an SO")
