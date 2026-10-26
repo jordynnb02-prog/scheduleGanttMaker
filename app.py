@@ -1,7 +1,7 @@
 import streamlit as st
 from openpyxl import load_workbook
 
-from schedule_parser import listAllSO
+from schedule_parser import listAllSO, getSOactivities
 
 st.title("Master Schedule Gantt Generator")
 
@@ -20,3 +20,6 @@ if uploaded_file is not None:
 
     so_nums = listAllSO(sheet)
     selectedSo = st.selectbox( "Select Service Order Number", sorted(so_nums), index=None, placeholder="Search for an SO")
+
+
+    st.text(getSOactivities(sheet, selectedSo))
