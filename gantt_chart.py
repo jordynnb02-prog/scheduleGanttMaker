@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 def createGanttChart(projectTasks):
-    fig, ax = plt.subplots(figsize=(12,6))
+    chartHeight = max(6, len(projectTasks) * 0.4)
+    fig, ax = plt.subplots(figsize=(12,chartHeight))
 
     for task in projectTasks:
         if task["Start"] is None or task["End"] is None:

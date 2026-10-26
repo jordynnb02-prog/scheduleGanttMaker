@@ -1,7 +1,7 @@
 import streamlit as st
 from openpyxl import load_workbook
 
-from schedule_parser import listAllSO, getSOactivities
+from schedule_parser import listAllSO, getSOactivities, groupSchedule
 from gantt_chart import createGanttChart
 
 st.title("Master Schedule Gantt Generator")
@@ -28,3 +28,8 @@ if uploaded_file is not None:
     if selectedSo is not None:
         fig = createGanttChart(projectSchedule)
         st.pyplot(fig)
+
+    grouped = groupSchedule(projectSchedule)
+
+    for section, tasks in grouped.items():
+        st.text(f"{section}: {len(tasks)} activities")

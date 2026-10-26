@@ -48,3 +48,27 @@ def getSOactivities(masterSchedule, choosenSO):
     return projectSchedule
 
 # FILTER STAGES 
+def groupSchedule(projectTasks):
+    groupedSchedule = {}
+    stages = {task["Stage"].strip() for task in projectTasks}
+    hasMultipleStages = len(stages) > 1
+
+    for task in projectTasks:
+        phase = task["Phase"].strip()
+        stage = task["Stage"].strip()
+
+        if phase in ("Elec. Drawings", "Mech. Drawings"):
+            groupName = "Engineering / Drawings"
+        elif phase in ("IFA", "Comments", "IFC"):
+            groupName = "IFA Approval"
+        elif phase  in ("Cuttintg", "Bending", "Welding", "Paint"):
+            groupName = "Fabrication"
+        else:
+            if hasMultipleStages:
+                groupName = stage
+            else:
+                groupName = "Production"
+
+        groupedSchedule.setdefault(groupName, []).append(task)
+
+    return groupedSchedule
