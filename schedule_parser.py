@@ -47,5 +47,4 @@ def getSOactivities(masterSchedule, choosenSO):
     projectSchedule = fullScehdule[choosenSO]
     return projectSchedule
 
-
 # FILTER STAGES 

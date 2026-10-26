@@ -2,6 +2,7 @@ import streamlit as st
 from openpyxl import load_workbook
 
 from schedule_parser import listAllSO, getSOactivities
+from gantt_chart import createGanttChart
 
 st.title("Master Schedule Gantt Generator")
 
@@ -21,5 +22,9 @@ if uploaded_file is not None:
     so_nums = listAllSO(sheet)
     selectedSo = st.selectbox( "Select Service Order Number", sorted(so_nums), index=None, placeholder="Search for an SO")
 
+    with st.spinner("Searching Master Schedule..."):
+        projectSchedule = getSOactivities(sheet, selectedSo)
 
-    st.text(getSOactivities(sheet, selectedSo))
+    if selectedSo is not None:
+        fig = createGanttChart(projectSchedule)
+        st.pyplot(fig)
