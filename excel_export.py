@@ -25,7 +25,15 @@ DARK = "1E293B"
 LIGHT = "F1F5F9"
 GRID = "DCE3EC"
 WHITE = "FFFFFF"
+def lightenColor(hexColor, amount=0.65):
+    rgb = [int(hexColor[i:i+2], 16) for i in (0, 2, 4)]
 
+    lighter = [
+        round(channel + (255 - channel) * amount)
+        for channel in rgb
+    ]
+
+    return "".join(f"{channel:02X}" for channel in lighter)
 
 def formatSectionName(name):
     match = re.search(r"\((\d+)\)\s*$", name)
@@ -244,38 +252,43 @@ def createExcelGantt(selectedGroups, so_number="Project"):
 
         for row in range(section_row, last_task_row + 1):
 
-            formula = (
-                f'AND(ISNUMBER($B{row}),'
-                f'ISNUMBER($C{row}),'
-                f'$B{row}<{get_column_letter(4)}$6+7,'
-                f'$C{row}>={get_column_letter(4)}$6)'
+            start = sheet.cell(row, 2).value
+            finish = sheet.cell(row, 3).value
+
+            # Section summary rows contain formulas, so
+            # use the calculated dates from Python instead.
+            if row == section_row:
+                start = min(task["start"] for task in group["tasks"])
+                finish = max(task["end"] for task in group["tasks"])
+
+            start = toDate(start)
+            finish = toDate(finish)
+
+            if start is None or finish is None:
+                continue
+
+            for col in range(4, last_column + 1):
+
+                week_start = sheet.cell(6, col).value
+                week_end = week_start + timedelta(days=7)
+
+                if start < week_end and finish >= week_start:
+                    # Use a lighter color for major section bars
+                    barColor = lightenColor(color, 0.65) if row == section_row else color
+
+                    sheet.cell(row, col).fill = PatternFill(
+                        fill_type="solid",
+                        fgColor=barColor
+)
+
+            # Add stronger borders to section row
+            section_border = Border(
+                top=Side(style="medium", color=color),
+                bottom=Side(style="thin", color=color)
             )
 
-            # Excel adjusts the relative timeline
-            # column reference across the range.
-            fill = PatternFill(
-                "solid",
-                fgColor=color
-            )
-
-            rule = FormulaRule(
-                formula=[formula],
-                fill=fill
-            )
-
-            sheet.conditional_formatting.add(
-                f"D{row}:{last_letter}{row}",
-                rule
-            )
-
-        # Add stronger borders to section row
-        section_border = Border(
-            top=Side(style="medium", color=color),
-            bottom=Side(style="thin", color=color)
-        )
-
-        for cell in sheet[section_row][:last_column]:
-            cell.border = section_border
+            for cell in sheet[section_row][:last_column]:
+                cell.border = section_border
 
     # ------------------------------------------
     # FINAL FORMATTING
