@@ -4,6 +4,7 @@ from openpyxl import load_workbook
 from io import BytesIO
 import hashlib
 import matplotlib.pyplot as plt
+from excel_export import createExcelGantt
 
 from schedule_parser import (
     listAllSO,
@@ -120,26 +121,54 @@ if uploaded_file is not None:
 
     grouped = groupSchedule(projectSchedule)
 
+    # ---------------------------------------------------------
+    # SELECT SECTIONS
+    # ---------------------------------------------------------
+
     st.subheader(f"Schedule Sections — {selectedSo}")
 
     selectedGroups = {}
 
     for section, tasks in grouped.items():
-        if st.checkbox(section, value=True, key=f"{file_id}_{selectedSo}_{section}"):
+        if st.checkbox(
+            section,
+            value=True,
+            key=f"include_{file_id}_{selectedSo}_{section}"
+        ):
             selectedGroups[section] = tasks
 
-
-# ---------------------------------------------------------
-# GENERATE GANTT CHART
-# ---------------------------------------------------------
+    # ---------------------------------------------------------
+    # GENERATE GANTT CHART
+    # ---------------------------------------------------------
 
     st.subheader("Gantt Chart")
+
     if selectedGroups:
+
+        # Generate and display the Gantt chart
         with st.spinner("Generating Gantt chart..."):
-            fig = createGanttChart(selectedGroups)
+            fig = createGanttChart(
+                selectedGroups,
+                list(selectedGroups.keys())
+            )
+
             st.pyplot(fig)
             plt.close(fig)
+
+        # Generate the Excel workbook
+        excel_data = createExcelGantt(selectedGroups, selectedSo)
+
+        st.download_button(
+            label="Download Excel Gantt Chart",
+            data=excel_data,
+            file_name=f"{selectedSo}_Gantt.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
     else:
-        st.info("Select at least one section to display the Gantt chart.")
+        st.info(
+            "Select at least one section to display the Gantt chart."
+        )
+
 else:
     st.info("Upload a Master Schedule to get started.")

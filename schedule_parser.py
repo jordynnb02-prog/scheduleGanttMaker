@@ -1,10 +1,26 @@
 import re
 
-def formatSectionName(section):
-    match = re.search(r"\((\d+)\)\s*$", section)
-    if match: 
-        return f"Section {match.group(1)}"
-    return section
+
+
+def classifyProductionTask(taskName):
+    name = taskName.strip().lower()
+
+    if "assembly" in name or "assemble" in name or "cut, bend, punch" in name:
+        return "Assembly"
+
+    elif "install" in name:
+        return "Installation"
+
+    elif "wiring" in name or "wire" in name or "electrical" in name:
+        return "Wiring"
+
+    elif "qc" in name or "fat" in name or "punchlist" in name:
+        return "Quality Control"
+
+    elif "ship" in name or "inspection" in name:
+        return "Shipping"
+
+    return "Assembly"
 
 def listAllSO(masterSchedule):
     allSOnums = []
@@ -77,3 +93,13 @@ def groupSchedule(projectTasks):
         groupedSchedule.setdefault(groupName, []).append(task)
 
     return groupedSchedule
+
+def groupProductionTasks(tasks):
+    subgroups = {}
+
+    for task in tasks:
+        category = classifyProductionTask(task["Phase"])
+
+        subgroups.setdefault(category, []).append(task)
+
+    return subgroups
