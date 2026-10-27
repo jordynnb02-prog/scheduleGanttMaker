@@ -1,5 +1,10 @@
 import re
 
+def formatSectionName(section):
+    match = re.search(r"\((\d+)\)\s*$", section)
+    if match: 
+        return f"Section {match.group(1)}"
+    return section
 
 def listAllSO(masterSchedule):
     allSOnums = []
@@ -20,6 +25,7 @@ def listAllSO(masterSchedule):
 
 # READ AND ORGANIZE THE ENTIRE SCHEDULE WORKSHEET
 def readMasterSchedule(masterSchedule):
+    print("\n PROCESSING NEW FILE \n\n\n\n\n\n\n\n\n\n")
     so_numbers = listAllSO(masterSchedule)
     fullSchedule = {}
     for project in so_numbers:
@@ -42,9 +48,8 @@ def readMasterSchedule(masterSchedule):
     return fullSchedule
     
 # RETRIVE ALL ACTIVITIES FOR ONE SO NUMBER
-def getSOactivities(masterSchedule, choosenSO):
-    fullScehdule = readMasterSchedule(masterSchedule)
-    projectSchedule = fullScehdule[choosenSO]
+def getSOactivities(fullSchedule, choosenSO):
+    projectSchedule = fullSchedule[choosenSO]
     return projectSchedule
 
 # FILTER STAGES 
@@ -61,7 +66,7 @@ def groupSchedule(projectTasks):
             groupName = "Engineering / Drawings"
         elif phase in ("IFA", "Comments", "IFC"):
             groupName = "IFA Approval"
-        elif phase  in ("Cuttintg", "Bending", "Welding", "Paint"):
+        elif phase  in ("Cutting", "Bending", "Welding", "Paint"):
             groupName = "Fabrication"
         else:
             if hasMultipleStages:
